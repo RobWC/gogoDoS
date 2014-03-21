@@ -13,6 +13,7 @@ var protoFlag = flag.String("p","","Specify protocol to use for DoS")
 var destPort = flag.Int("P",53,"Specify destination port for DoS")
 var destIPs = flag.String("d","","Specify an single host or a list of hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5)")
 var rateFlag = flag.Int("r",1,"Specify the amount of protocol requests per second")
+var durationFlag = flag.Int("D",60,"Specify the total duration of the test")
 
 func main() {
     flag.Parse()
@@ -42,7 +43,7 @@ func main() {
             if response.Rcode != dns.RcodeSuccess {
                 log.Println(" query fail")
             }
-            log.Println(response.Answer)
+            log.Println(response.MsgHdr.Id)
         }
     }
 
