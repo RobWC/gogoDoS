@@ -44,7 +44,7 @@ func dnsQuery(config *dns.ClientConfig, queryCounter int) {
 
 
 func main() {
-    runtime.GOMAXPROCS(runtime.NumCPU() * 2)
+    runtime.GOMAXPROCS(0)
     var runCounter int
     runCounter = 0
     var queryCounter int
