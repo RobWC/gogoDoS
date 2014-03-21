@@ -62,7 +62,6 @@ func main() {
 
     for t := range ticker.C {
         runCounter = runCounter + 1
-        log.Println(t)
         for i := 0; i < *rateFlag; i++ {
             wg.Add(1)
             go dnsQuery(config, queryCounter)
