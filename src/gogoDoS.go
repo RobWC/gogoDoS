@@ -2,15 +2,17 @@ package main
 
 import (
 	"flag"
-	"github.com/miekg/dns"
-	"gogoDoS/channels/channelman"
-	"gogoDoS/protocols/dnsproto"
-	//"gogoDoS/protocols/dnsproto/dnsstat"
 	"log"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/miekg/dns"
+	"gogoDoS/channels/channelman"
+	"gogoDoS/protocols/dnsproto"
+	//"gogoDoS/protocols/dnsproto/dnsstat"
+    //"code.google.com/p/go.net/ipv4"
 )
 
 var protoFlag = flag.String("p", "", "Specify protocol to use for DoS")

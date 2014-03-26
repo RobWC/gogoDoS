@@ -10,6 +10,6 @@ type ChannelMan struct {
 }
 
 func (cm *ChannelMan) Init() {
-	cm.StatsChannel = make(chan *dnsstat.Info)
-	cm.RunChannel = make(chan bool)
+	cm.StatsChannel = make(chan *dnsstat.Info,5000)
+	cm.RunChannel = make(chan bool,5000)
 }
