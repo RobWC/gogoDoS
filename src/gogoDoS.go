@@ -12,7 +12,7 @@ import (
 	"gogoDoS/channels/channelman"
 	"gogoDoS/protocols/dnsproto"
 	//"gogoDoS/protocols/dnsproto/dnsstat"
-    //"code.google.com/p/go.net/ipv4"
+	//"code.google.com/p/go.net/ipv4"
 )
 
 var protoFlag = flag.String("p", "", "Specify protocol to use for DoS")
@@ -20,6 +20,7 @@ var destPort = flag.Int("P", 53, "Specify destination port for DoS")
 var destIPs = flag.String("d", "", "Specify an single host or a list of hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5)")
 var rateFlag = flag.Int("r", 1, "Specify the amount of protocol requests per second")
 var durationFlag = flag.Int("D", 60, "Specify the total duration of the test")
+var interfaceFlag = flag.String("i", "", "Specify which interface name to eject packets from (raw packets only)")
 
 func main() {
 	cm := new(channelman.ChannelMan)

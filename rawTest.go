@@ -55,17 +55,32 @@ func (uh *UDPHeader) Marshal() ([]byte, error) {
 	return b, nil
 }
 
+func (uh *UDPHeader) GenChecksum() error {
+	var padd uint16
+	padd = 0
+	var checksum uint16
+	checksum = 0
+	var word16 uint16
+
+	for i := 0; i < udp_len+padd; i = i + 2 {
+		word16 = (())
+	}
+
+	return nil
+}
+
 func foo() {
 	//create new raw packet connection
 
 	//localAddress, _ := net.ResolveIPAddr("ip4", "10.0.1.100")
 	//remoteAddress2, _ := net.ResolveIPAddr("ip4", "10.0.1.100")
-	localAddress := net.IPv4(10, 0, 1, 100)
+	localAddress := net.IPv4(1, 2, 3, 4)
 	remoteAddress := net.IPv4(10, 0, 1, 100)
 
 	fmt.Println(net.Interfaces())
 
-	con, err := net.ListenPacket("ip4", "0.0.0.0")
+	//ip on mac, ip4:udp for linux
+	con, err := net.ListenPacket("ip4:udp", "0.0.0.0")
 
 	if err != nil {
 		fmt.Println(err)
@@ -81,36 +96,40 @@ func foo() {
 	rawCon.SetTTL(128)
 
 	headers := new(ipv4.Header)
-	payload := make([]byte, 64)
+	payload := make([]byte, 42)
+
+	query := []byte{0x0d, 0x35, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x64, 0x61, 0x69, 0x73, 0x79, 0x06, 0x75, 0x62, 0x75, 0x6e, 0x74, 0x75, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01}
 
 	headers.Src = localAddress
 	headers.Dst = remoteAddress
 	headers.Protocol = 17
 	headers.Len = 20
 	headers.Version = 4
-	headers.TotalLen = 84
 	headers.TTL = 128
 
 	//UDP Header
 	uh := new(UDPHeader)
-	uh.Len = 8
+	uh.Len = 42
 	uh.SrcPort = 12345
 	uh.DstPort = 53
 	uh.Checksum = 0
 	udpHead, _ := uh.Marshal()
 	fmt.Println(udpHead)
+	headers.TotalLen = 20 + len(query) + len(udpHead)
 
 	copy(payload[0:8], udpHead)
-	fmt.Println(payload)
+	copy(payload[8:], query)
 
 	cm := new(ipv4.ControlMessage)
 
-	cm.Src = net.IPv4(10, 0, 1, 100)
+	//cm.Src = net.IPv4(1, 2, 3, 4)
 	cm.Dst = net.IPv4(10, 0, 1, 100)
 	cm.TTL = 128
-	cm.IfIndex = 5
+	cm.IfIndex = 3
 
 	fmt.Println(headers)
+	fmt.Println(cm)
+	fmt.Println(payload)
 
 	rawCon.WriteTo(headers, payload, cm)
 
