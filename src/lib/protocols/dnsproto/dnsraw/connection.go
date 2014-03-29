@@ -10,6 +10,7 @@ import (
 	"sync"
 )
 
+//RawDNS data struct. Contains L3, L4 Headers, payload and control message for specifying the egress interface
 type RawDNS struct {
 	IPHeaders     *ipv4.Header
 	UDPHeader     *UDPHeader
@@ -19,6 +20,7 @@ type RawDNS struct {
 	CtrlMsg       *ipv4.ControlMessage
 }
 
+//return an initalized RawDNS struct
 func NewRawDNS() *RawDNS {
 	return &RawDNS{IPHeaders: new(ipv4.Header),
 		UDPHeader:     new(UDPHeader),
@@ -28,10 +30,12 @@ func NewRawDNS() *RawDNS {
 		CtrlMsg:       new(ipv4.ControlMessage)}
 }
 
+//set destination port
 func (rdns *RawDNS) SetDestPort(port uint16) {
 	rdns.UDPHeader.SetDstPort(port)
 }
 
+//set local or source address
 func (rdns *RawDNS) SetLocalAddress(ip string) {
 	parsedIP := strings.Split(ip, ".")
 	ip0, _ := strconv.Atoi(parsedIP[0])
@@ -41,6 +45,7 @@ func (rdns *RawDNS) SetLocalAddress(ip string) {
 	rdns.LocalAddress = net.IPv4(byte(ip0), byte(ip1), byte(ip2), byte(ip3))
 }
 
+//set remote address of
 func (rdns *RawDNS) SetRemoteAddress(ip string) {
 	parsedIP := strings.Split(ip, ".")
 	ip0, _ := strconv.Atoi(parsedIP[0])

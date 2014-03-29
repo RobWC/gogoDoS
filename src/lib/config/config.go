@@ -39,19 +39,22 @@ func (cfg *Config) SetProtocol(p string) {
 	cfg.Protocol = p
 }
 
-//
+//set the destination port
 func (cfg *Config) SetDstPort(p uint16) {
 	cfg.DstPort = p
 }
 
+//set the rate of number of requests per second
 func (cfg *Config) SetRate(p uint) {
 	cfg.Rate = p
 }
 
+//set the total number of seconds to run the test
 func (cfg *Config) SetDuration(p uint) {
 	cfg.Duration = p
 }
 
+//set the egress interface by name. If the Interface does not exist then barf and error and exit
 func (cfg *Config) SetInterfaceByName(name string) error {
 	newInt, err := net.InterfaceByName(name)
 	cfg.Interface = newInt
@@ -61,14 +64,17 @@ func (cfg *Config) SetInterfaceByName(name string) error {
 	return nil
 }
 
+//set the destination IPs by the input string we patse them into a slice
 func (cfg *Config) SetDstIPsByString(iplist string) {
 	cfg.DstIPs = parseIPsToSlice(iplist)
 }
 
+//set the source IPs by the input string we parse them into a slice
 func (cfg *Config) SetSrcIPsByString(iplist string) {
 	cfg.SrcIPs = parseIPsToSlice(iplist)
 }
 
+//private function to parse an IP list
 func parseIPsToSlice(iplist string) []string {
 	return strings.Split(iplist, ",")
 }
