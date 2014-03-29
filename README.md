@@ -1,3 +1,5 @@
+[![Build Status](https://magnum.travis-ci.com/JNPRAutomate/gogoDoS.svg?token=Taq81d9PL7keqp96e9qu&branch=master)](https://magnum.travis-ci.com/JNPRAutomate/gogoDoS)
+
 gogoDoS
 =======
 
