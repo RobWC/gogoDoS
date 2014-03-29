@@ -7,24 +7,7 @@ import (
 	"net"
 )
 
-const (
-	posTOS      = 1  // type-of-service
-	posTotalLen = 2  // packet total length
-	posID       = 4  // identification
-	posFragOff  = 6  // fragment offset
-	posTTL      = 8  // time-to-live
-	posProtocol = 9  // next protocol
-	posChecksum = 10 // checksum
-	posSrc      = 12 // source address
-	posDst      = 16 // destination address
-)
-
-const (
-	posUDPSrcPort = 1 // Source Port
-	posUDPDstPort = 3 // Dest Port
-	posLen        = 4
-)
-
+//The format of the UDP packet header
 type UDPHeader struct {
 	SrcPort  uint16 //Source Port
 	DstPort  uint16 //Destination Port
@@ -46,7 +29,6 @@ func (uh *UDPHeader) Marshal() ([]byte, error) {
 	binary.BigEndian.PutUint16(dstportb, uh.DstPort)
 	binary.BigEndian.PutUint16(lenb, uh.Len)
 	binary.BigEndian.PutUint16(checksumb, uh.Checksum)
-	fmt.Println(srcportb, uh.SrcPort)
 	copy(b[0:2], srcportb)
 	copy(b[2:4], dstportb)
 	copy(b[4:6], lenb)

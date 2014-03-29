@@ -2,14 +2,14 @@ package dnsproto
 
 import (
 	"github.com/miekg/dns"
-	"gogoDoS/channels/channelman"
-	"gogoDoS/protocols/dnsproto/dnsstat"
+	"lib/channels/chanman"
+	"lib/protocols/dnsproto/dnsstat"
 	"log"
 	"net"
 	"sync"
 )
 
-func DnsQuery(wg *sync.WaitGroup, config *dns.ClientConfig, queryCounter int, cm *channelman.ChannelMan) {
+func DnsQuery(wg *sync.WaitGroup, config *dns.ClientConfig, cm *chanman.ChanMan) {
 	defer wg.Done()
 	dnsClient := new(dns.Client)
 	message := new(dns.Msg)
@@ -20,7 +20,7 @@ func DnsQuery(wg *sync.WaitGroup, config *dns.ClientConfig, queryCounter int, cm
 
 	if err != nil {
 		log.Println(err)
-		cm.RunChannel <- true
+		cm.RunChan <- true
 	}
 
 	if response == nil {
@@ -30,7 +30,7 @@ func DnsQuery(wg *sync.WaitGroup, config *dns.ClientConfig, queryCounter int, cm
 		}
 		var stat = new(dnsstat.Info)
 		stat.Rtt = rtt
-		cm.StatsChannel <- stat
-		cm.RunChannel <- true
+		cm.StatsChan <- stat
+		cm.RunChan <- true
 	}
 }
