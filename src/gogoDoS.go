@@ -22,7 +22,7 @@ var destIPs = flag.String("d", "127.0.0.1", "Specify an single host or a list of
 var srcIPs = flag.String("s", "127.0.0.1", "Specify an single host or a list of source hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5), only used for reflection attacks")
 var rateFlag = flag.Uint("r", 1, "Specify the amount of protocol requests per second")
 var durationFlag = flag.Uint("D", 60, "Specify the total duration of the test")
-var interfaceFlag = flag.String("i", "", "Specify which interface name to eject packets from (raw packets only)")
+var interfaceFlag = flag.String("i", "eth0", "Specify which interface name to eject packets from (raw packets only)")
 var floodFlag = flag.Bool("F", false, "Specifies if the dns request should be flooded statelessly")
 var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from. In this case the source IPs are destination IPs and the destination is the source.")
 
