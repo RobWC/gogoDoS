@@ -9,4 +9,5 @@ install:
     - go get github.com/miekg/dns
 
 script:
+ - echo $GOPATH
  - go test -v ./...
