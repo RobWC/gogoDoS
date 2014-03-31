@@ -9,5 +9,5 @@ install:
     - go get github.com/miekg/dns
 
 script:
- - echo $GOPATH
+ - export GOPATH=$TRAVIS_BUILD_DIR:$GOPATH
  - go test -v ./...
