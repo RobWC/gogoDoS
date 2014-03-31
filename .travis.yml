@@ -6,4 +6,7 @@ go:
 install:
     - go get code.google.com/p/go.text/encoding
     - go get code.google.com/p/go.net/ipv4
-    - go get github.com/miekg/dns/
+    - go get github.com/miekg/dns
+
+script:
+ - go test -v ./...
