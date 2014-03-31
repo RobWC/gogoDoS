@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
-	"lib/channels/chanman"
-	"lib/config"
-	"lib/protocols/dnsproto"
-	"lib/protocols/dnsproto/dnsraw"
+	"./lib/channels/chanman"
+	"./lib/config"
+	"./lib/protocols/dnsproto"
+	"./lib/protocols/dnsproto/dnsraw"
 	//"code.google.com/p/go.net/ipv4"
 )
 
