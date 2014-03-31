@@ -5,7 +5,7 @@ gogoDoS
 
 DoS testing tool
 
-This tool helps in testing out our DoS product portfolio
+This tool helps in testing out our DoS prevention products. While this tool could support multiplatform as of today it is Linux only.
 
 Buidling:
 
