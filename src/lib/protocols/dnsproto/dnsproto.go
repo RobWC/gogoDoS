@@ -9,11 +9,11 @@ import (
 	"sync"
 )
 
-func DnsQuery(wg *sync.WaitGroup, config *dns.ClientConfig, cm *chanman.ChanMan) {
+func DnsQuery(query string, wg *sync.WaitGroup, config *dns.ClientConfig, cm *chanman.ChanMan) {
 	defer wg.Done()
 	dnsClient := new(dns.Client)
 	message := new(dns.Msg)
-	message.SetQuestion(dns.Fqdn("cnn.com"), dns.TypeA)
+	message.SetQuestion(dns.Fqdn(query), dns.TypeA)
 	message.RecursionDesired = true
 
 	response, rtt, err := dnsClient.Exchange(message, net.JoinHostPort(config.Servers[0], "53"))

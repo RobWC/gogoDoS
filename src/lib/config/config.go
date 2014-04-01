@@ -21,17 +21,20 @@ type Config struct {
 	Rate      uint           //packet rate
 	Duration  uint           //duration of test in seconds
 	Interface *net.Interface //Network interface for egress traffic
+	Query     string         //host name to query
 }
 
 //Return a new empty configuration
 func NewConfig() *Config {
-	return &Config{Protocol: "",
+	return &Config{
+		Protocol:  "",
 		DstPort:   0,
 		DstIPs:    make([]string, 0),
 		SrcIPs:    make([]string, 0),
 		Rate:      0,
 		Duration:  0,
-		Interface: new(net.Interface)}
+		Interface: new(net.Interface),
+		Query:     ""}
 }
 
 //set the specified protocol
@@ -52,6 +55,10 @@ func (cfg *Config) SetRate(p uint) {
 //set the total number of seconds to run the test
 func (cfg *Config) SetDuration(p uint) {
 	cfg.Duration = p
+}
+
+func (cfg *Config) SetQuery(p string) {
+	cfg.Query = p
 }
 
 //set the egress interface by name. If the Interface does not exist then barf and error and exit

@@ -3,6 +3,7 @@ package dnsraw
 import (
 	"code.google.com/p/go.net/ipv4"
 	"lib/channels/chanman"
+	"lib/config"
 	"log"
 	"net"
 	"strconv"
@@ -56,7 +57,7 @@ func (rdns *RawDNS) SetRemoteAddress(ip string) {
 	rdns.CtrlMsg.Dst = rdns.RemoteAddress
 }
 
-func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, ifIndex int, cm *chanman.ChanMan) {
+func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chanman.ChanMan) {
 	defer wg.Done()
 
 	//set the IP headers
@@ -75,7 +76,12 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, ifIndex int, cm *chanman.ChanMa
 
 	//set the control message
 	rdns.CtrlMsg.TTL = 128
-	rdns.CtrlMsg.IfIndex = ifIndex
+	rdns.CtrlMsg.IfIndex = config.Interface.Index
+
+	//set the query
+	query := NewQuery()
+	query.SetRequest(config.Query, "A")
+	queryb := query.Marshal()
 
 	//ip on mac, ip4:udp for linux
 	con, err := net.ListenPacket("ip4:udp", "0.0.0.0")
@@ -90,15 +96,14 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, ifIndex int, cm *chanman.ChanMa
 	}
 
 	//set query
-	query := []byte{0x0d, 0x35, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x64, 0x61, 0x69, 0x73, 0x79, 0x06, 0x75, 0x62, 0x75, 0x6e, 0x74, 0x75, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01}
+	//query := []byte{0x0d, 0x35, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x64, 0x61, 0x69, 0x73, 0x79, 0x06, 0x75, 0x62, 0x75, 0x6e, 0x74, 0x75, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01}
 
 	//set final payload
-	rdns.Payload = make([]byte, 42)
-	copy(rdns.Payload[0:8], udpHead)
-	copy(rdns.Payload[8:], query)
+	rdns.Payload = append(rdns.Payload, udpHead)
+	rdns.Payload = append(rdns.Payload, queryb)
 
 	//set packet length
-	rdns.IPHeaders.TotalLen = 20 + len(query) + len(udpHead)
+	rdns.IPHeaders.TotalLen = 20 + len(queryb) + len(udpHead)
 
 	rawCon.WriteTo(rdns.IPHeaders, rdns.Payload, rdns.CtrlMsg)
 	cm.RunChan <- true
