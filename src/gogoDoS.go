@@ -127,7 +127,7 @@ func main() {
 
 	//types stateful, flood, reflection
 	if *floodFlag != true && *reflectionFlag != true {
-		ew
+
 		//start a stateful request flow
 		// A stateful request is initiated by the client running the tool
 		config := new(dns.ClientConfig)

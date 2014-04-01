@@ -74,7 +74,7 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chan
 	queryb := query.Marshal()
 
 	//set the UDP headers
-	rdns.UDPHeader.SetLen(UDPHeaderLen)
+	rdns.UDPHeader.SetLen(8 + uint16(len(queryb)))
 	rdns.UDPHeader.GenRandomSrcPort()
 	rdns.UDPHeader.SetChecksum(0)
 	udpHead, _ := rdns.UDPHeader.Marshal()
@@ -102,11 +102,9 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chan
 
 	//set packet length
 	rdns.IPHeaders.TotalLen = 20 + len(queryb) + len(udpHead)
-	log.Println(rdns.IPHeaders)
 	rdns.Payload = make([]byte, 0)
 	rdns.Payload = append(rdns.Payload, udpHead...)
 	rdns.Payload = append(rdns.Payload, queryb...)
-	log.Println(len(rdns.Payload))
 
 	rawCon.WriteTo(rdns.IPHeaders, rdns.Payload, rdns.CtrlMsg)
 	cm.RunChan <- true
