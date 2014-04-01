@@ -61,7 +61,7 @@ func (uh *UDPHeader) SetSrcPort(port uint16) {
 
 //Sets the source port to a random port greater than 1025
 func (uh *UDPHeader) GenRandomSrcPort() {
-	rand.Seed(time.Now().Unix() * time.Now().Unix())
+	rand.Seed(time.Now().UnixNano() * time.Now().UnixNano())
 	uh.SrcPort = uint16(rand.Intn(65535-1025) + 1025)
 }
 

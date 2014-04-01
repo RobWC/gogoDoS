@@ -70,6 +70,7 @@ func main() {
 
 	if srcIPs != nil {
 		//process dest IPs to string array
+		log.Println("SET SRC", *srcIPs)
 		cfg.SetSrcIPsByString(*srcIPs)
 	} else {
 		log.Fatalf("Error in parsing the specified souce IPs %s\n", destIPs)
@@ -126,6 +127,7 @@ func main() {
 
 	//types stateful, flood, reflection
 	if *floodFlag != true && *reflectionFlag != true {
+		ew
 		//start a stateful request flow
 		// A stateful request is initiated by the client running the tool
 		config := new(dns.ClientConfig)

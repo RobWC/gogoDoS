@@ -56,16 +56,26 @@ func (qr *QueryRequest) SetClassDefault() {
 
 func (qr *QueryRequest) Marshal() []byte {
 	//return byte array
-	nameBytes := []byte(qr.Name)
+
+	//break apart the name by period
+	//count eatch segment
+	nameBytes := make([]byte, 0)
+
+	splitName := strings.Split(qr.Name, ".")
+	for name := range splitName {
+		nameBytes = append(nameBytes, byte(len(splitName[name])))
+		nameBytes = append(nameBytes, []byte(splitName[name])...)
+	}
+
 	nameBytes = append(nameBytes, 0)
-	nameLen := len(nameBytes)
+	//nameLen := len(nameBytes)
 	b := make([]byte, 0)
 	typeb := make([]byte, 2)
 	classb := make([]byte, 2)
 	binary.BigEndian.PutUint16(typeb, qr.Type)
 	binary.BigEndian.PutUint16(classb, qr.Class)
-	b = append(b, nameBytes)
-	b = append(b, typeb)
-	b = append(b, classb)
+	b = append(b, nameBytes...)
+	b = append(b, typeb...)
+	b = append(b, classb...)
 	return b
 }

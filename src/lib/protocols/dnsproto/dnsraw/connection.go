@@ -68,6 +68,11 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chan
 	rdns.IPHeaders.Version = 4
 	rdns.IPHeaders.TTL = 128
 
+	//set the query
+	query := NewQuery()
+	query.SetRequest(config.Query, "A")
+	queryb := query.Marshal()
+
 	//set the UDP headers
 	rdns.UDPHeader.SetLen(UDPHeaderLen)
 	rdns.UDPHeader.GenRandomSrcPort()
@@ -77,11 +82,6 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chan
 	//set the control message
 	rdns.CtrlMsg.TTL = 128
 	rdns.CtrlMsg.IfIndex = config.Interface.Index
-
-	//set the query
-	query := NewQuery()
-	query.SetRequest(config.Query, "A")
-	queryb := query.Marshal()
 
 	//ip on mac, ip4:udp for linux
 	con, err := net.ListenPacket("ip4:udp", "0.0.0.0")
@@ -99,11 +99,14 @@ func (rdns *RawDNS) DnsQuery(wg *sync.WaitGroup, config *config.Config, cm *chan
 	//query := []byte{0x0d, 0x35, 0x01, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x64, 0x61, 0x69, 0x73, 0x79, 0x06, 0x75, 0x62, 0x75, 0x6e, 0x74, 0x75, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01, 0x00, 0x01}
 
 	//set final payload
-	rdns.Payload = append(rdns.Payload, udpHead)
-	rdns.Payload = append(rdns.Payload, queryb)
 
 	//set packet length
 	rdns.IPHeaders.TotalLen = 20 + len(queryb) + len(udpHead)
+	log.Println(rdns.IPHeaders)
+	rdns.Payload = make([]byte, 0)
+	rdns.Payload = append(rdns.Payload, udpHead...)
+	rdns.Payload = append(rdns.Payload, queryb...)
+	log.Println(len(rdns.Payload))
 
 	rawCon.WriteTo(rdns.IPHeaders, rdns.Payload, rdns.CtrlMsg)
 	cm.RunChan <- true
