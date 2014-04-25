@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"runtime"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"lib/config"
 	"lib/protocols/dnsproto"
 	"lib/protocols/dnsproto/dnsraw"
+	"lib/protocols/dnsproto/dnsstat"
 )
 
 var protoFlag = flag.String("p", "dns", "Specify protocol to use for DoS (default: dns)") //specify which protocol to use, only dns for now
@@ -26,6 +28,7 @@ var durationFlag = flag.Uint("D", 60, "Specify the total duration of the test (d
 var interfaceFlag = flag.String("i", "eth0", "Specify which interface name to eject packets from (default: eth0)")
 var floodFlag = flag.Bool("F", false, "Specifies if the dns request should be flooded statelessly from the host running the tool. (default: false)")
 var reflectionFlag = flag.Bool("R", false, "If set to true the specified then specify the source IPs to spoof the requests from. In this case the source IPs are destination IPs and the destination is the source. (default: false)")
+var verboseFlag = flag.Bool("v", false, "Output each request (default: true)")
 
 func main() {
 	//Set the runtime to the max number of available CPUs
@@ -39,6 +42,10 @@ func main() {
 
 	//initailize the wait group used to manage the threads
 	wg := new(sync.WaitGroup)
+
+	//stats
+	stats := new(dnsstat.Stats)
+	stats.InfoCollection = make([]dnsstat.Info, 0)
 
 	//initialize the counters for our statistcs
 	var runCounter uint
@@ -115,12 +122,14 @@ func main() {
 				if val == true {
 					queryCounter = queryCounter + 1
 				} else if val == false {
-					log.Println("FALSE")
 					return
 				}
 			case val := <-cm.StatsChan:
 				//aggregate stats
-				log.Println(*val)
+				if *verboseFlag == true {
+					log.Printf("Query Time %s", val.Rtt)
+				}
+				stats.InfoCollection = append(stats.InfoCollection, *val)
 			}
 		}
 	}()
@@ -136,8 +145,7 @@ func main() {
 		config.Ndots = 1
 		config.Timeout = 1
 		config.Attempts = 1
-		for t := range ticker.C {
-			log.Println(t)
+		for _ = range ticker.C {
 			runCounter = runCounter + 1
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
@@ -146,13 +154,14 @@ func main() {
 			}
 			if runCounter == *durationFlag {
 				wg.Wait()
-				log.Printf("Completed %d queries over %d runs to %s", queryCounter, runCounter, *destIPs)
+				min, max, avg, jitter := stats.Calc()
+				fmt.Printf("rtt min/avg/max/mdev = %s/%s/%s/%s\n", min, max, avg, jitter)
+				fmt.Printf("Completed %d queries over %d runs to %s\n", queryCounter, runCounter, *destIPs)
 				break
 			}
 		}
 	} else if *floodFlag && *reflectionFlag != true {
-		for t := range ticker.C {
-			log.Println(t)
+		for _ = range ticker.C {
 			runCounter = runCounter + 1
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
@@ -171,8 +180,7 @@ func main() {
 		}
 	} else if *reflectionFlag && *floodFlag != true {
 		//reflect off of destination hosts from source IPs
-		for t := range ticker.C {
-			log.Println(t)
+		for _ = range ticker.C {
 			runCounter = runCounter + 1
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
