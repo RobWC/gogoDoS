@@ -1,4 +1,4 @@
-package dnsstat
+package main
 
 import (
 	"sort"

@@ -1,4 +1,4 @@
-package dnsraw
+package main
 
 import (
 	"encoding/binary"
@@ -7,7 +7,7 @@ import (
 )
 
 type Query struct {
-	Id       uint16
+	ID       uint16
 	Flags    uint16
 	Qdcount  uint16
 	Ancount  uint16
@@ -18,7 +18,7 @@ type Query struct {
 }
 
 func NewQuery() *Query {
-	return &Query{Id: genID(),
+	return &Query{ID: genID(),
 		Flags:    0x0100,
 		Qdcount:  1,
 		Ancount:  0,
@@ -33,12 +33,12 @@ func genID() uint16 {
 	return uint16(rand.Intn(65536-1) + 1)
 }
 
-func (q *Query) GenId() {
-	q.Id = genID()
+func (q *Query) GenID() {
+	q.ID = genID()
 }
 
-func (q *Query) SetId(t uint16) {
-	q.Id = t
+func (q *Query) SetID(t uint16) {
+	q.ID = t
 }
 
 func (q *Query) SetRequest(s string, t string) {
@@ -51,14 +51,14 @@ func (q *Query) SetRequest(s string, t string) {
 func (q *Query) Marshal() []byte {
 	//return byte array of query
 	queryRequestb := q.Request.Marshal()
-	idb := make([]byte, 2)
+	IDb := make([]byte, 2)
 	flagsb := make([]byte, 2)
 	qdcountb := make([]byte, 2)
 	ancountb := make([]byte, 2)
 	nscountb := make([]byte, 2)
 	arcountb := make([]byte, 2)
 	arrcountb := make([]byte, 2)
-	binary.BigEndian.PutUint16(idb, q.Id)
+	binary.BigEndian.PutUint16(IDb, q.ID)
 	binary.BigEndian.PutUint16(flagsb, q.Flags)
 	binary.BigEndian.PutUint16(qdcountb, q.Qdcount)
 	binary.BigEndian.PutUint16(ancountb, q.Ancount)
@@ -67,7 +67,7 @@ func (q *Query) Marshal() []byte {
 	binary.BigEndian.PutUint16(arrcountb, q.Arrcount)
 
 	b := make([]byte, 0)
-	b = append(b, idb...)
+	b = append(b, IDb...)
 	b = append(b, flagsb...)
 	b = append(b, qdcountb...)
 	b = append(b, nscountb...)

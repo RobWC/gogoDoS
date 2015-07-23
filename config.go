@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"log"
@@ -9,7 +9,7 @@ import (
 type ConfigProtocol struct {
 	Name string //Name of protocol
 	Port uint16 //Port for protocol
-	Id   uint16 //Protocol ID
+	ID   uint16 //Protocol ID
 }
 
 //Struct to hold the config

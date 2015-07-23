@@ -1,4 +1,4 @@
-package dnsraw
+package main
 
 import (
 	"encoding/binary"

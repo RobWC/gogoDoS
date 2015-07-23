@@ -11,11 +11,9 @@ import (
 
 	"github.com/miekg/dns"
 
-	"lib/channels/chanman"
-	"lib/config"
-	"lib/protocols/dnsproto"
-	"lib/protocols/dnsproto/dnsraw"
-	"lib/protocols/dnsproto/dnsstat"
+	"./lib/channels/chanman"
+	"./lib/protocols/dnsproto"
+	"./lib/protocols/dnsproto/dnsstat"
 )
 
 var protoFlag = flag.String("p", "dns", "Specify protocol to use for DoS (default: dns)") //specify which protocol to use, only dns for now
@@ -38,7 +36,7 @@ func main() {
 	cm := chanman.NewChanMan()
 
 	//initalize a config
-	cfg := config.NewConfig()
+	cfg := NewConfig()
 
 	//initailize the wait group used to manage the threads
 	wg := new(sync.WaitGroup)
@@ -166,7 +164,7 @@ func main() {
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
 				wg.Add(1)
-				rawQuery := dnsraw.NewRawDNS()
+				rawQuery := NewRawDNS()
 				rawQuery.SetLocalAddress(cfg.SrcIPs[0])
 				rawQuery.SetRemoteAddress(cfg.DstIPs[0])
 				rawQuery.SetDestPort(cfg.DstPort)
@@ -185,7 +183,7 @@ func main() {
 			var i uint
 			for i = 0; i < cfg.Rate; i++ {
 				wg.Add(1)
-				rawQuery := dnsraw.NewRawDNS()
+				rawQuery := NewRawDNS()
 				rawQuery.SetLocalAddress(cfg.DstIPs[0])
 				rawQuery.SetRemoteAddress(cfg.SrcIPs[0])
 				rawQuery.SetDestPort(cfg.DstPort)

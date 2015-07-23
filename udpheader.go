@@ -1,4 +1,4 @@
-package dnsraw
+package main
 
 import (
 	"encoding/binary"
@@ -48,6 +48,7 @@ func (uh *UDPHeader) Marshal() ([]byte, error) {
 
 //BUG(Rob): This doesnt work yet
 //Generates the proper checksum for the UDP header
+//https://github.com/packetbeat/gopacket/blob/9f6f103107a8eeea93a485f4fc7880d7e663e3b9/layers/tcpip.go
 func (uh *UDPHeader) GenChecksum() error {
 	//calcumete
 	uh.Checksum = 0
